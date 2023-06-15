@@ -1,12 +1,13 @@
 import express from "express";
 import { routerProducts } from "./routes/products.routes.js";
+import { routerCart } from "./routes/cart.routes.js"
 const app = express();
 
 app.use(express.json());
 app.use(express.urlencoded( {extended: true} ));
 
 app.use("/products", routerProducts);
-//app.use("/carts", routerCarts);
+app.use("/carts", routerCart);
 
 
 

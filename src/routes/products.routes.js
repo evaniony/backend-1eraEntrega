@@ -1,6 +1,7 @@
 import  express  from "express";
 export const routerProducts = express.Router();
 import { ProductManager } from "../utils/ProductManager.js";
+import fs from "fs";
 
 
 const productManager = new ProductManager('product.json');
@@ -37,18 +38,60 @@ routerProducts.get("/:pid", async (req, res)=>{
 
 
 routerProducts.post("/", async (req, res)=>{
-    const prod = req.body;
-    console.log(prod);
-    const addProduct = await productManager.addProduct();
+    const {title, description, price, thumbnail, code, stock, category} = req.body;
+    const addProduct = await productManager.addProduct(title, description, price, thumbnail, code, stock, category);
 
-    if(addProduct){
+    if (addProduct) {
         return res.status(201).json(
             {message: "product created!",    
-             data: addProduct
-            })
+             data: req.body
+            });
     }else{
         return res.status(404).json(
-            {message: "error, bad response",    
+            {error: "error, bad response",    
+             data: {}
+            });
+    };
+});
+
+//comentar de que actualiza, pero no pisa la propiedad
+//suma una propiedad "prop", con el nuevo value; 
+routerProducts.put("/:pid", async (req, res) =>{
+    let id = parseInt(req.params.pid);
+    let {prop, value} = req.body;
+    console.log(prop, value);
+
+    const update = await productManager.updateProduct(id, prop, value);
+
+    if (update) {
+        return res.status(201).json(
+            {message: `${id}, modified product!`,    
+             data: req.body
+            });
+    }else{
+        return res.status(404).json(
+            {error: "An error has occurred.",
+            //lo agregue para visualizar los valores ingresados momentaneamente;   
+             data: `${id}??? ${req.body.prop}, ${req.body.value}`
+            });
+    };
+});
+
+
+//elimina correctamente, pero ocurre errores??
+//ocurrio un error?
+routerProducts.delete("/:pid", async (req, res)=>{
+    let id = parseInt(req.params.pid);
+    const deleteProd = await productManager.deleteProduct(id);
+
+    if (deleteProd){
+        return res.status(201).json(
+            {message: "product delete!",    
+             data: {}
+            });
+    }else{
+        return res.status(404).json(
+            {error: "An error has occurred.",    
              data: {}
             });
     }

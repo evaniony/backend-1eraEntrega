@@ -1,4 +1,3 @@
-//const fs = require("fs");
 import fs from "fs";
 
 export class ProductManager{
@@ -10,7 +9,20 @@ export class ProductManager{
         }
     }
 
-    async addProduct(title, description, price, thumbnail, code, stock, status, category){
+    async #read(){
+        const readFile = await fs.promises.readFile(this.path, "utf-8");
+        const parse = JSON.parse(readFile);
+
+        return parse;
+    }
+    async #write(action){
+        const writeFile = await fs.promises.writeFile(this.path, JSON.stringify(action));
+        return writeFile;
+    }
+
+
+
+    async addProduct(title, description, price, thumbnail, code, stock, category){
         let newProduct = {
             title: title,
             description: description,
@@ -18,14 +30,12 @@ export class ProductManager{
             thumbnail: thumbnail,
             code: code,
             stock: stock,
-            status: true,
-            category: category
+            category: category,
+            status: true
         }
-
-            const readFile = await fs.promises.readFile(this.path, "utf-8");
-            const parse = JSON.parse(readFile);
+            const parse = await this.#read();
             let id = parse.length;
-            newProduct = {id: id, ...newProduct};
+            newProduct = {id: id,  ...newProduct};
 
             if((!newProduct.title) || (!newProduct.description) || (!newProduct.price) || (!newProduct.thumbnail) || (!newProduct.code) || (!newProduct.stock) || (!newProduct.category)){
                 console.log("Falta ingresar un valor!");
@@ -33,21 +43,19 @@ export class ProductManager{
             }
 
             parse.push(newProduct);
-            await fs.promises.writeFile(this.path, JSON.stringify(parse));
+            await this.#write(parse);
                 return newProduct;
     }
 
     async getProducts(){
-        const read = await fs.promises.readFile(this.path, "utf-8");
-        const readParse = JSON.parse(read);
-            return readParse;
+        const read = await this.#read();
+            return read;
     }
 
     async getProductById(id){
-            const read = await fs.promises.readFile(this.path, "utf-8");
+            const read = await this.#read();
 
             if(read){
-                const readParse = JSON.parse(read);
                 const product = readParse.find(e => e.id === id);
                 return product;
             }else{
@@ -57,14 +65,16 @@ export class ProductManager{
 
     async updateProduct(id, prop, value){
         if((prop !== id) && (value !== undefined || null || "")){
-            let read = await fs.promises.readFile(this.path, "utf-8");
-            read = JSON.parse(read);
+            //let read = this.#read();
+            const readFile = await fs.promises.readFile(this.path, "utf-8");
+            const parse = JSON.parse(readFile);
+            
+            const updateIndex = parse.findIndex(prod => prod.id == id);
+            const toUpdate = parse[updateIndex];
+                  parse[updateIndex] = {... toUpdate, prop: value}
+            await fs.promises.writeFile(this.path, JSON.stringify(parse));
 
-            const updateIndex = read.findIndex(prod => prod.id == id);
-            const toUpdate = read[updateIndex];
-                  read[updateIndex] = {... toUpdate, [prop]: value}
-
-  	        await fs.promises.writeFile(this.path, JSON.stringify(read));
+                    //await this.#write(read);
 
         }else{
             const error = console.log("Ocurrio un error: Falta completar un campo");
@@ -73,14 +83,14 @@ export class ProductManager{
         };
     }
 
+    
+
     async deleteProduct(id){
-        //corregir esto:
-        let read = await fs.promises.readFile(this.path, "utf-8");
-        let readParse = JSON.parse(read);
-            readParse = readParse.filter(e => e.id !== id);
-        //let deleteId = readParse.splice(id, 1);
-        /* let rewrite = await fs.promises.writeFile(this.path, JSON.stringify(readParse));
-            return rewrite; */
+        const read = await this.#read();
+        const readParse = read.filter(e => e.id !== id);
+
+        await this.#write(readParse);
+            //return rewrite;
         
     }
 
