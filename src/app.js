@@ -11,7 +11,7 @@ app.use("/carts", routerCart);
 
 
 
-app.get("*", (req, res)=>{
+app.use("*", (req, res)=>{
     res.status(400).send(
         {status: "error",
         msg: "Error, la ruta no existe;",

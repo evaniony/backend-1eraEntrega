@@ -1,7 +1,7 @@
 import express from "express";
 export const routerCart = express.Router();
-import { ProductManager } from "../utils/ProductManager.js";
-import { CartManager } from "../utils/CartManager.js";
+import { ProductManager } from "../ProductManager.js";
+import { CartManager } from "../CartManager.js";
 
 const cartManager = new CartManager('cart.json');
 
@@ -35,6 +35,30 @@ routerCart.get("/:cid", async (req, res)=>{
     }else{    
         return res.status(404).json(
         {message: "No existe el producto con el id: " + cid,    
+         data: {}
+        });
+    }
+});
+
+routerCart.post("/:cid/products/:pid", async (req, res) =>{
+    let cid = req.params.cid;
+    let pid = req.params.pid;
+
+    cid = req.body;
+    pid = req.body;
+
+    //console.log(cid, pid);
+
+    const addprod = await cartManager.addItem(cid, pid);
+
+    if(addprod != undefined){
+        return res.status(201).json(
+            {message: "add successully!",    
+             data: addprod
+            }); 
+    }else{    
+        return res.status(404).json(
+        {message: `bad request ${cid}, ${pid}`,    
          data: {}
         });
     }

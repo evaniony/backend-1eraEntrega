@@ -1,6 +1,6 @@
 import  express  from "express";
 export const routerProducts = express.Router();
-import { ProductManager } from "../utils/ProductManager.js";
+import { ProductManager } from "../ProductManager.js";
 import fs from "fs";
 
 

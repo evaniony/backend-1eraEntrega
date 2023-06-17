@@ -56,7 +56,7 @@ export class ProductManager{
             const read = await this.#read();
 
             if(read){
-                const product = readParse.find(e => e.id === id);
+                const product = read.find(e => e.id === id);
                 return product;
             }else{
                 return "Not found";
